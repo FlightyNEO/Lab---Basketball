@@ -6,6 +6,9 @@
 //  Copyright © 2019 Arkadiy Grigoryanc. All rights reserved.
 //
 
+// Model Basketball post - https://www.cgtrader.com/free-3d-models/exterior/exterior-public/basketball-post
+
+
 import ARKit
 
 class ViewController: UIViewController {
@@ -18,18 +21,12 @@ class ViewController: UIViewController {
     private let configuration: ARWorldTrackingConfiguration? = nil
     private var postIsAdded = false
     
-    private enum Size: Float {
-        case real = 1           // 4 meters
-        case half = 0.5         // 2 meters
-        case quarter = 0.25     // 1 meters
-    }
-    
-    private var scale: Float {
+    private var sizeModel: ModelManager.Size {
         
         #if DEBUG
-        return Size.quarter.rawValue
+        return .quarter
         #else
-        return Size.real.rawValue
+        return .real
         #endif
         
     }
@@ -84,7 +81,7 @@ extension ViewController: ARSCNViewDelegate {
         guard let anchor = anchor as? ARPlaneAnchor else { return }
         guard !postIsAdded else { return }
         
-        modelManager.addWall(to: node, scale: scale, anchor: anchor) { _ in
+        modelManager.addPost(to: node, size: sizeModel, anchor: anchor) { _ in
             
             self.configuration?.planeDetection = []
             self.postIsAdded = true

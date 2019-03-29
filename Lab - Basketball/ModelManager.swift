@@ -29,9 +29,18 @@ struct ModelManager {
         
     }
     
+    /**
+     Model size relative to the real world
+     */
+    enum Size: Float {
+        case real = 1           // 4 meters
+        case half = 0.5         // 2 meters
+        case quarter = 0.25     // 1 meters
+    }
+    
     // MARK: - Initialization
     private init() {}
-    static var manager: ModelManager { return ModelManager.init() }
+    static var manager: ModelManager { return ModelManager() }
     
     // MARK - Errors
     enum NodeManagerError: Error {
@@ -45,7 +54,7 @@ struct ModelManager {
             let sceneFile = sceneFile,
             let sceneNode = SCNScene(named: sceneFile)?.rootNode else {
                 
-                throw NodeManagerError.fetchError(error: "Not fined node for this name")
+                throw NodeManagerError.fetchError(error: "Not found node for this name")
                 
         }
         
@@ -60,7 +69,7 @@ struct ModelManager {
             
             guard let node = sceneNode.childNode(withName: model.rawValue, recursively: true) else {
                 
-                completion(.failure(.fetchError(error: "Not fined node for this name")))
+                completion(.failure(.fetchError(error: "Not found node for this name")))
                 return
                 
             }
@@ -81,7 +90,16 @@ struct ModelManager {
         node.scale.z *= index
     }
     
-    func addWall(to parent: SCNNode, scale: Float = 1, anchor: ARPlaneAnchor, completion: ((_ node: SCNNode) -> ())? = nil) {
+    /**
+     Add basketball post to a node
+     
+     - parameters:
+        - parent: node where post is added
+        - size: the size of the post in the real world. Default is "Real"
+        - anchor:
+        - completion: return "post node". Default is "nil"
+     */
+    func addPost(to parent: SCNNode, size: Size = .real, anchor: ARPlaneAnchor, completion: ((_ node: SCNNode) -> ())? = nil) {
         
         fetch(.post) { result in
             
@@ -91,7 +109,7 @@ struct ModelManager {
                 
                 var wall = node.clone()
                 
-                self.scale(&wall, by: scale)
+                self.scale(&wall, by: size.rawValue)
                 
                 parent.addChildNode(wall)
                 
