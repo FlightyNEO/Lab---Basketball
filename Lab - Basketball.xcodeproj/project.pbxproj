@@ -14,6 +14,7 @@
 		584F4D23224CBC4A00196408 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 584F4D22224CBC4A00196408 /* Assets.xcassets */; };
 		584F4D26224CBC4A00196408 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 584F4D24224CBC4A00196408 /* LaunchScreen.storyboard */; };
 		584F4D2E224CC0B800196408 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584F4D2D224CC0B800196408 /* ModelManager.swift */; };
+		58B794CA224E351600B0BF93 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B794C9224E351600B0BF93 /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		584F4D25224CBC4A00196408 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		584F4D27224CBC4A00196408 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		584F4D2D224CC0B800196408 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
+		58B794C9224E351600B0BF93 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		582648D5224FB0830045B558 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				584F4D1B224CBC4800196408 /* art.scnassets */,
+				58B794C9224E351600B0BF93 /* Utils.swift */,
+				584F4D1F224CBC4800196408 /* Main.storyboard */,
+				584F4D22224CBC4A00196408 /* Assets.xcassets */,
+				584F4D24224CBC4A00196408 /* LaunchScreen.storyboard */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		582648D6224FB0920045B558 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				584F4D2D224CC0B800196408 /* ModelManager.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		582648D7224FB0990045B558 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				584F4D1D224CBC4800196408 /* ViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		584F4D0D224CBC4800196408 = {
 			isa = PBXGroup;
 			children = (
@@ -59,12 +89,9 @@
 			isa = PBXGroup;
 			children = (
 				584F4D19224CBC4800196408 /* AppDelegate.swift */,
-				584F4D2D224CC0B800196408 /* ModelManager.swift */,
-				584F4D1B224CBC4800196408 /* art.scnassets */,
-				584F4D1D224CBC4800196408 /* ViewController.swift */,
-				584F4D1F224CBC4800196408 /* Main.storyboard */,
-				584F4D22224CBC4A00196408 /* Assets.xcassets */,
-				584F4D24224CBC4A00196408 /* LaunchScreen.storyboard */,
+				582648D6224FB0920045B558 /* Models */,
+				582648D5224FB0830045B558 /* Resources */,
+				582648D7224FB0990045B558 /* Controllers */,
 				584F4D27224CBC4A00196408 /* Info.plist */,
 			);
 			path = "Lab - Basketball";
@@ -145,6 +172,7 @@
 				584F4D1E224CBC4800196408 /* ViewController.swift in Sources */,
 				584F4D1A224CBC4800196408 /* AppDelegate.swift in Sources */,
 				584F4D2E224CC0B800196408 /* ModelManager.swift in Sources */,
+				58B794CA224E351600B0BF93 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
