@@ -33,3 +33,14 @@ extension SCNVector3 {
 
 }
 
+extension UISegmentedControl {
+    
+    /// Replace the current segments with new ones using a given sequence of string.
+    /// - parameter withTitles:     The titles for the new segments.
+    public func replaceSegments<T: Sequence>(withTitles: T) where T.Iterator.Element == String {
+        removeAllSegments()
+        for title in withTitles {
+            insertSegment(withTitle: title, at: numberOfSegments, animated: false)
+        }
+    }
+}

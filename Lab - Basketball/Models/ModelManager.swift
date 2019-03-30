@@ -64,12 +64,27 @@ struct ModelManager {
     /**
      Model size relative to the real world
      */
-    enum ModelSize: Float {
+    enum ModelSize: Float, CaseIterable, CustomStringConvertible {
         case real = 1           // 4 meters
         case half = 0.5         // 2 meters
         case third = 0.3333     // 1.(3) meters
         case quarter = 0.25     // 1 meters
         case quaver = 0.125     // 0.5 meters
+        
+        var description: String {
+            
+            switch self {
+                
+            case .real: return "Real size"
+            case .half: return "Half size"
+            case .third: return "Third size"
+            case .quarter: return "Quarter size"
+            case .quaver: return "Quaver size"
+                
+            }
+            
+        }
+        
     }
     
     /**
@@ -87,18 +102,17 @@ struct ModelManager {
             
             switch self {
                 
-            case .size3: return #"Size 3 - 25,5""#
-            case .size5: return #"Size 3 - 27,5""#
-            case .size6: return #"Size 3 - 28,5""#
-            case .size7: return #"Size 3 - 29,5""#
-            case .size10: return #"Size 3 - 34,5""#
+            case .size3: return #"25,5""#
+            case .size5: return #"27,5""#
+            case .size6: return #"28,5""#
+            case .size7: return #"29,5""#
+            case .size10: return #"34,5""#
                 
             }
             
         }
         
     }
-    
     
     weak var delegate: ModelManagerDelegate?
     

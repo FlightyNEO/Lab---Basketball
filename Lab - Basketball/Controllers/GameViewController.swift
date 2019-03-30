@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  GameViewController.swift
 //  Lab - Basketball
 //
 //  Created by Arkadiy Grigoryanc on 28/03/2019.
@@ -11,7 +11,7 @@
 
 import ARKit
 
-class ViewController: UIViewController {
+class GameViewController: UIViewController {
     
     // MARK: - Outlets
     @IBOutlet weak var sceneView: ARSCNView!
@@ -20,16 +20,6 @@ class ViewController: UIViewController {
     private var modelManager: ModelManager!
     
     private var postIsAdded = false
-    
-    private var sizeModel: ModelManager.ModelSize {
-        
-        #if DEBUG
-        return .third
-        #else
-        return .real
-        #endif
-        
-    }
     
     deinit {
         #if DEBUG
@@ -40,6 +30,7 @@ class ViewController: UIViewController {
     private var postPlacementAreaSize: CGSize? = nil
     
     // MARK: - Properties
+    var sizeModel: ModelManager.ModelSize = .real
     var typeBall: ModelManager.BallTypeSize = .size10
     
     override func viewDidLoad() {
@@ -84,14 +75,20 @@ class ViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
+        navigationController?.isNavigationBarHidden = false
+        
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
     }
     
 }
 
 // MARK: - Private methods
-extension ViewController {
+extension GameViewController {
     
     private func suitableSizeForPlacementArea(candidate: CGSize) -> Bool {
         
@@ -130,10 +127,25 @@ extension ViewController {
         
     }
     
+    private func createQuitAlertViewController() {
+        
+        let alertController = UIAlertController(title: "Attention!", message: "Are you sure you want to quit?", preferredStyle: .alert)
+        let quitAction = UIAlertAction(title: "Quit", style: .destructive) { [unowned self] _ in
+            _ = self.navigationController?.popViewController(animated: true)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alertController.addAction(quitAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true)
+        
+    }
+    
 }
 
 // MARK: - ARSCNViewDelegate
-extension ViewController: ARSCNViewDelegate {
+extension GameViewController: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) { }
     
@@ -162,7 +174,7 @@ extension ViewController: ARSCNViewDelegate {
 }
 
 // MARK: - Actions
-extension ViewController {
+extension GameViewController {
     
     @IBAction func actionTapped(_ sender: UITapGestureRecognizer) {
         
@@ -214,13 +226,13 @@ extension ViewController {
     }
     
     @IBAction func actionBack() {
-        _ = navigationController?.popViewController(animated: true)
+        createQuitAlertViewController()
     }
     
 }
 
 // MARK: - ModelManagerDelegate
-extension ViewController: ModelManagerDelegate {
+extension GameViewController: ModelManagerDelegate {
     
     func ballWillAdded(_ ball: SCNNode) {
         

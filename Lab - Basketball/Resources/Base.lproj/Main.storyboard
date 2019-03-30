@@ -10,51 +10,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Choose bascketball post-->
-        <scene sceneID="kwl-eC-d5Y">
-            <objects>
-                <tableViewController id="Aqu-Dp-87k" customClass="MainTableViewController" customModule="Lab___Basketball" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="iFD-ij-0n4">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ModelCell" textLabel="cPi-iq-yFV" style="IBUITableViewCellStyleDefault" id="sef-Fk-yh0">
-                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="sef-Fk-yh0" id="u4Z-UE-vER">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="cPi-iq-yFV">
-                                            <rect key="frame" x="16" y="0.0" width="288" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <segue destination="BV1-FR-VrT" kind="show" identifier="ShowAR" id="Y24-9p-HvM"/>
-                                </connections>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="Aqu-Dp-87k" id="j0O-Q0-uYJ"/>
-                            <outlet property="delegate" destination="Aqu-Dp-87k" id="KxF-2v-9vU"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Choose bascketball post" id="a3W-ml-Ywl"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="qLX-KI-8Za" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="174.375" y="129.92957746478874"/>
-        </scene>
-        <!--View Controller-->
+        <!--Game View Controller-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="ViewController" customModule="Lab___Basketball" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BV1-FR-VrT" customClass="GameViewController" customModule="Lab___Basketball" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="U0K-SW-4ec">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -67,8 +26,8 @@
                                 </connections>
                             </arscnView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="alI-gf-VzY" userLabel="Back">
-                                <rect key="frame" x="254" y="40" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
+                                <rect key="frame" x="270" y="40" width="30" height="30"/>
+                                <state key="normal" title="Quit"/>
                                 <connections>
                                     <action selector="actionBack" destination="BV1-FR-VrT" eventType="touchUpInside" id="3hL-wl-kB1"/>
                                 </connections>
@@ -82,6 +41,7 @@
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="trailing" secondItem="fQZ-KI-GVf" secondAttribute="trailing" id="XyZ-9z-H8e"/>
                             <constraint firstItem="alI-gf-VzY" firstAttribute="top" secondItem="fQZ-KI-GVf" secondAttribute="top" constant="20" id="fCe-Ic-DiW"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="U0K-SW-4ec" secondAttribute="top" id="rJc-2c-zQA"/>
+                            <constraint firstItem="alI-gf-VzY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="fQZ-KI-GVf" secondAttribute="leading" symbolic="YES" id="sr3-Vm-Bty"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                         <connections>
@@ -105,7 +65,90 @@
                     </connections>
                 </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1136.25" y="129.92957746478874"/>
+            <point key="canvasLocation" x="1104.375" y="-639.08450704225356"/>
+        </scene>
+        <!--Basketball game-->
+        <scene sceneID="WcT-cC-FUg">
+            <objects>
+                <viewController id="XPe-4j-aMb" customClass="MainViewController" customModule="Lab___Basketball" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="gFE-cd-pvL">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HGs-jv-3iK">
+                                <rect key="frame" x="122" y="518" width="76" height="30"/>
+                                <state key="normal" title="Start game"/>
+                                <connections>
+                                    <segue destination="BV1-FR-VrT" kind="show" identifier="ShowAR" id="5Tc-8X-TwZ"/>
+                                </connections>
+                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="bwd-Se-S94">
+                                <rect key="frame" x="58" y="213.5" width="204" height="141"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dBE-fm-wa3">
+                                        <rect key="frame" x="0.0" y="0.0" width="204" height="60"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Choose size basket ball" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Asc-Sx-EVQ">
+                                                <rect key="frame" x="0.0" y="0.0" width="204" height="24"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Fk4-UA-foY">
+                                                <rect key="frame" x="0.0" y="32" width="204" height="29"/>
+                                                <segments>
+                                                    <segment title="1"/>
+                                                    <segment title="2"/>
+                                                    <segment title="3"/>
+                                                    <segment title="4"/>
+                                                </segments>
+                                                <connections>
+                                                    <action selector="actionChangeBallTypeSize:" destination="XPe-4j-aMb" eventType="valueChanged" id="ayz-xV-4II"/>
+                                                </connections>
+                                            </segmentedControl>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="F1B-Ad-1Sp">
+                                        <rect key="frame" x="15" y="76" width="174" height="65"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Choose size models" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f2f-ff-c28">
+                                                <rect key="frame" x="0.0" y="0.0" width="174" height="24"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oaE-85-elI">
+                                                <rect key="frame" x="0.0" y="32" width="174" height="33"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <state key="normal" title="Choose size"/>
+                                                <connections>
+                                                    <action selector="actionChooseSizeModel:" destination="XPe-4j-aMb" eventType="touchUpInside" id="xh9-lT-nIe"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="bwd-Se-S94" firstAttribute="centerY" secondItem="gFE-cd-pvL" secondAttribute="centerY" id="F9L-n3-ai5"/>
+                            <constraint firstItem="HGs-jv-3iK" firstAttribute="centerX" secondItem="gFE-cd-pvL" secondAttribute="centerX" id="aee-ey-RRn"/>
+                            <constraint firstItem="bwd-Se-S94" firstAttribute="centerX" secondItem="gFE-cd-pvL" secondAttribute="centerX" id="heh-Sz-8OB"/>
+                            <constraint firstItem="4eU-nd-fTd" firstAttribute="bottom" secondItem="HGs-jv-3iK" secondAttribute="bottom" constant="20" id="stx-79-yCp"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="4eU-nd-fTd"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Basketball game" id="RC1-RU-vLF"/>
+                    <connections>
+                        <outlet property="sizeModelButton" destination="oaE-85-elI" id="K0R-ZA-VOn"/>
+                        <outlet property="startGameButton" destination="HGs-jv-3iK" id="qwl-Uf-MeP"/>
+                        <outlet property="typesSizeBallSegmentedControl" destination="Fk4-UA-foY" id="9NJ-uG-htk"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kiW-TC-Oaf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="174" y="-639"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="9AL-nw-7K6">
@@ -118,12 +161,12 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="Aqu-Dp-87k" kind="relationship" relationship="rootViewController" id="wEr-yR-vFR"/>
+                        <segue destination="XPe-4j-aMb" kind="relationship" relationship="rootViewController" id="lyh-hr-ixY"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W3w-hj-rUa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-823.125" y="129.92957746478874"/>
+            <point key="canvasLocation" x="-729" y="-639"/>
         </scene>
     </scenes>
 </document>
