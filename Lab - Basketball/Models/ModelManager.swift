@@ -8,7 +8,7 @@
 
 import ARKit
 
-protocol ModelManagerDelegate {
+protocol ModelManagerDelegate: class {
     
     func postWillAdded()
     func placementAreaWillAdded()
@@ -75,20 +75,38 @@ struct ModelManager {
     /**
      Ball size relative to the real world
      */
-    enum BallTypeSize: Float {
+    enum BallTypeSize: Float, CaseIterable, CustomStringConvertible {
+        
         case size10 = 1         // 34.5" 0.279m
         case size7 = 0.855      // 29.5" 0.239m
         case size6 = 0.826      // 28.5" 0.231m
         case size5 = 0.797      // 27.5" 0.222m
         case size3 = 0.739      // 25.5" 0.206m
+        
+        var description: String {
+            
+            switch self {
+                
+            case .size3: return #"Size 3 - 25,5""#
+            case .size5: return #"Size 3 - 27,5""#
+            case .size6: return #"Size 3 - 28,5""#
+            case .size7: return #"Size 3 - 29,5""#
+            case .size10: return #"Size 3 - 34,5""#
+                
+            }
+            
+        }
+        
     }
     
     
-    var delegate: ModelManagerDelegate?
+    weak var delegate: ModelManagerDelegate?
     
     // MARK: - Initialization
-    private init() {}
-    static var manager: ModelManager { return ModelManager() }
+    init(delegate: ModelManagerDelegate) {
+        self.delegate = delegate
+    }
+    //static var manager: ModelManager { return ModelManager() }
     
     // MARK - Errors
     enum NodeManagerError: Error {
@@ -368,8 +386,6 @@ struct ModelManager {
          - completion: return "ball node". Default is "nil"
      */
     func addBall(typeSize: BallTypeSize, to parent: SCNNode, size: ModelSize = .real, transform: simd_float4x4, powerFactor: PowerFactor = (front: 1.0, up: 1.0), completion: ((_ post: SCNNode) -> ())? = nil) {
-//        let position = SCNVector3(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
-//        addBall(typeSize: typeSize, to: parent, size: size, position: position, completion: completion)
         
         fetch(.ball) { result in
             
@@ -402,6 +418,11 @@ struct ModelManager {
             }
             
         }
+        
     }
+    
+    // TODO: -
+    // TODO: 1 Removing balls
+    // TODO: 2 Scoring
     
 }

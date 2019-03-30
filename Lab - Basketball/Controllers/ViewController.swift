@@ -14,11 +14,11 @@ import ARKit
 class ViewController: UIViewController {
     
     // MARK: - Outlets
-    @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet weak var sceneView: ARSCNView!
     
     // MARK: - Private properties
-    private var modelManager = ModelManager.manager
-//    private var configuration: ARWorldTrackingConfiguration? = nil
+    private var modelManager: ModelManager!
+    
     private var postIsAdded = false
     
     private var sizeModel: ModelManager.ModelSize {
@@ -31,12 +31,21 @@ class ViewController: UIViewController {
         
     }
     
-    private var typeBall: ModelManager.BallTypeSize = .size10
+    deinit {
+        #if DEBUG
+        print("DEINIT")
+        #endif
+    }
     
-    private lazy var postPlacementAreaSize: CGSize? = nil
+    private var postPlacementAreaSize: CGSize? = nil
+    
+    // MARK: - Properties
+    var typeBall: ModelManager.BallTypeSize = .size10
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationController?.isNavigationBarHidden = true
         
         // Set the view's delegate
         sceneView.delegate = self
@@ -55,7 +64,7 @@ class ViewController: UIViewController {
         // Set the scene to the view
         sceneView.scene = scene
         
-        modelManager.delegate = self
+        modelManager = ModelManager(delegate: self)
         
         // Fetch size placement area for bascketball post
         modelManager.placementAreaSizeOfPost(by: sizeModel) { postPlacementAreaSize = $0 }
@@ -202,6 +211,10 @@ extension ViewController {
             
         }
         
+    }
+    
+    @IBAction func actionBack() {
+        _ = navigationController?.popViewController(animated: true)
     }
     
 }
