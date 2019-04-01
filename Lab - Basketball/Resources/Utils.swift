@@ -44,3 +44,7 @@ extension UISegmentedControl {
         }
     }
 }
+
+func randFloat<F: FloatingPoint>(_ min: F, _ max: F) -> F {
+    return min + ((max-min)*(F(arc4random())/F(RAND_MAX)))
+}

@@ -15,6 +15,7 @@ class GameViewController: UIViewController {
     
     // MARK: - Outlets
     @IBOutlet weak var sceneView: ARSCNView!
+    @IBOutlet weak var scoreLabel: UILabel!
     
     // MARK: - Private properties
     private var modelManager: ModelManager!
@@ -28,6 +29,20 @@ class GameViewController: UIViewController {
     }
     
     private var postPlacementAreaSize: CGSize? = nil
+    
+    private var isCollidedFirstHoop = false
+    
+    private let maxBallsOnScene = 10
+    private var balls = [SCNNode]()
+    
+    private var ballsCollidedWithTheFirstRing = [SCNNode]()
+    private var scoredBalls = [SCNNode]() {
+        didSet {
+            DispatchQueue.main.async {
+                self.scoreLabel.text = String(self.scoredBalls.count) + "scores"
+            }
+        }
+    }
     
     // MARK: - Properties
     var sizeModel: ModelManager.ModelSize = .real
@@ -46,7 +61,8 @@ class GameViewController: UIViewController {
 //        sceneView.showsStatistics = true
 //        sceneView.debugOptions = [.showFeaturePoints, .showWorldOrigin]
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+//        sceneView.showsStatistics = true
+//        sceneView.debugOptions = [.showPhysicsShapes]
         #endif
         
         // Create a new scene
@@ -55,10 +71,18 @@ class GameViewController: UIViewController {
         // Set the scene to the view
         sceneView.scene = scene
         
+        // Set the contact delegate for "scene"
+        sceneView.scene.physicsWorld.contactDelegate = self
+        
         modelManager = ModelManager(delegate: self)
         
         // Fetch size placement area for bascketball post
         modelManager.placementAreaSizeOfPost(by: sizeModel) { postPlacementAreaSize = $0 }
+        
+        // Prepare ball
+        modelManager.prepareBall(typeSize: typeBall, size: sizeModel)
+//        modelManager.addBall(typeSize: typeBall, to: sceneView.scene.rootNode, size: sizeModel, transform: transform, powerFactor: powerFactor)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -217,7 +241,18 @@ extension GameViewController {
             
             guard powerFactor.up > 0 else { return }
             
-            modelManager.addBall(typeSize: typeBall, to: sceneView.scene.rootNode, size: sizeModel, transform: transform, powerFactor: powerFactor)
+            modelManager.addAndThrowBall(to: sceneView.scene.rootNode, transform: transform, powerFactor: powerFactor) {
+                $0.name = $0.name! + String(self.balls.count)
+                self.balls.append($0)
+            }
+            
+            if balls.count >= maxBallsOnScene {
+                
+                modelManager.removeBall(balls.removeFirst())
+                
+            }
+            
+//            modelManager.addBall(typeSize: typeBall, to: sceneView.scene.rootNode, size: sizeModel, transform: transform, powerFactor: powerFactor)
             
         default: break
             
@@ -251,6 +286,71 @@ extension GameViewController: ModelManagerDelegate {
         #if DEBUG
         print("BALL DIAMETER = ", diameter)
         #endif
+        
+    }
+    
+}
+
+// MARK: SCNPhysicsContactDelegate
+extension GameViewController: SCNPhysicsContactDelegate {
+    
+//    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+//
+////        print(#function)
+////        print("did begin contact", contact.nodeA.physicsBody!.categoryBitMask, contact.nodeB.physicsBody!.categoryBitMask)
+////
+////        if contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue ||
+////            contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue {
+////
+////            print("Woohoo")
+////
+////        }
+//
+//    }
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
+        
+        //print(#function)
+        print("did end contact", contact.nodeA.physicsBody!.categoryBitMask, contact.nodeB.physicsBody!.categoryBitMask)
+        
+        if (contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
+            contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.firstHoop.rawValue) ||
+            (contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
+                contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.firstHoop.rawValue) {
+            
+            let ball = contact.nodeA.name!.contains(ModelManager.NodeModel.ball.rawValue) ? contact.nodeA : contact.nodeB
+            
+            ballsCollidedWithTheFirstRing.append(ball)
+            
+            if ballsCollidedWithTheFirstRing.count >= maxBallsOnScene {
+                ballsCollidedWithTheFirstRing.removeFirst()
+            }
+            
+            print("Woohoo")
+            
+        }
+        
+        if ((contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
+            contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.secondHoop.rawValue) ||
+            (contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
+                contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.secondHoop.rawValue)) {
+            
+            guard !ballsCollidedWithTheFirstRing.isEmpty else { return }
+            
+            let ball = contact.nodeA.name!.contains(ModelManager.NodeModel.ball.rawValue) ? contact.nodeA : contact.nodeB
+            
+            if ballsCollidedWithTheFirstRing.contains(where: { $0.name == ball.name }) &&
+                !scoredBalls.contains(ball) {
+                
+                scoredBalls.append(ball)
+                
+                //scoreLabel.text = String(scoredBalls.count) + "scores"
+                
+                print("ГОООООООООООЛ!!!!!!!!!")
+                
+            }
+            
+        }
         
     }
     

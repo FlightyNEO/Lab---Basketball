@@ -32,15 +32,24 @@
                                     <action selector="actionBack" destination="BV1-FR-VrT" eventType="touchUpInside" id="3hL-wl-kB1"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 scores" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2La-lS-Uuk">
+                                <rect key="frame" x="16" y="40" width="111" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="leading" secondItem="fQZ-KI-GVf" secondAttribute="leading" id="GsS-dJ-CKf"/>
                             <constraint firstItem="fQZ-KI-GVf" firstAttribute="trailing" secondItem="alI-gf-VzY" secondAttribute="trailing" constant="20" id="Qeb-Y4-Csa"/>
+                            <constraint firstItem="2La-lS-Uuk" firstAttribute="top" secondItem="fQZ-KI-GVf" secondAttribute="top" constant="20" id="V3x-ZT-HA4"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="bottom" secondItem="fQZ-KI-GVf" secondAttribute="bottom" id="VpT-BR-CcM"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="trailing" secondItem="fQZ-KI-GVf" secondAttribute="trailing" id="XyZ-9z-H8e"/>
                             <constraint firstItem="alI-gf-VzY" firstAttribute="top" secondItem="fQZ-KI-GVf" secondAttribute="top" constant="20" id="fCe-Ic-DiW"/>
+                            <constraint firstItem="2La-lS-Uuk" firstAttribute="leading" secondItem="fQZ-KI-GVf" secondAttribute="leading" constant="16" id="nnc-DX-9cv"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="U0K-SW-4ec" secondAttribute="top" id="rJc-2c-zQA"/>
+                            <constraint firstItem="alI-gf-VzY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="2La-lS-Uuk" secondAttribute="trailing" constant="8" symbolic="YES" id="rcu-mR-FY2"/>
                             <constraint firstItem="alI-gf-VzY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="fQZ-KI-GVf" secondAttribute="leading" symbolic="YES" id="sr3-Vm-Bty"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
@@ -51,6 +60,7 @@
                     <nil key="simulatedTopBarMetrics"/>
                     <connections>
                         <outlet property="sceneView" destination="BrB-h1-WRS" id="nKk-nL-572"/>
+                        <outlet property="scoreLabel" destination="2La-lS-Uuk" id="Ck6-bO-iCK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>

@@ -8,6 +8,17 @@
 
 import ARKit
 
+struct CollisionCategory: OptionSet {
+    let rawValue: Int
+    
+    static let balls  = CollisionCategory(rawValue: 1 << 0) // 00...0001
+    static let firstHoop = CollisionCategory(rawValue: 1 << 1) // 00..0010
+    static let secondHoop = CollisionCategory(rawValue: 1 << 2) // 00..0100
+    static let floor = CollisionCategory(rawValue: 1 << 3) // 00..1000
+    static let post = CollisionCategory(rawValue: 1 << 4) // 00..0001 ...
+    
+}
+
 protocol ModelManagerDelegate: class {
     
     func postWillAdded()
@@ -27,13 +38,14 @@ extension ModelManagerDelegate {
     func placementAreaWillAdded() { print(#function) }
     func placementAreaWillUpdated() { print(#function) }
     func ballWillAdded(_ ball: SCNNode) { print(#function) }
+    
     func postDidAdded() { print(#function) }
     func placementAreaDidAdded() { print(#function) }
     func placementAreaDidUpdated() { print(#function) }
     func ballDidAdded(_ ball: SCNNode) { print(#function) }
 }
 
-struct ModelManager {
+class ModelManager {
     
     // MARK: - Properties
     
@@ -42,18 +54,25 @@ struct ModelManager {
     enum NodeModel: String {
         
         case post = "BasketballPost"
-        case ball2 = "Ball"
         case ball = "Basketball"
         case floor = "floor"
+        
+        case cylinder1
+        case cylinder2
+        
+        case helperCylinder
+        
+        static var cylinders: [NodeModel] {
+            return [.cylinder1, .cylinder2]
+        }
         
         fileprivate var sceneName: String {
             
             switch self {
                 
-            case .post: return "art.scnassets/Basketball_Post/Basketball_Post.scn"
-            case .ball2: return "art.scnassets/Basketball_Post/Basket ball/BASEKT_Ball-2.scn"
+            case .post, .floor, .cylinder1, .cylinder2, .helperCylinder: return "art.scnassets/Basketball_Post/Basketball_Post.scn"
             case .ball: return "art.scnassets/Basketball_Post/Basket ball/basketball.dae"
-            case .floor: return "art.scnassets/Basketball_Post/Basketball_Post.scn"
+            //case .floor: return "art.scnassets/Basketball_Post/Basketball_Post.scn"
                 
             }
             
@@ -107,6 +126,20 @@ struct ModelManager {
             case .size6: return #"28,5""#
             case .size7: return #"29,5""#
             case .size10: return #"34,5""#
+                
+            }
+            
+        }
+        
+        var mass: CGFloat {
+            
+            switch self {
+                
+            case .size3: return 0.315
+            case .size5: return 0.485
+            case .size6: return 0.520
+            case .size7: return 0.620
+            case .size10: return 0.850
                 
             }
             
@@ -173,40 +206,96 @@ struct ModelManager {
     }
     
     // MARK: ... physics
+    private func createPhysicsBodyForCylinder(_ node: SCNNode) -> SCNPhysicsBody {
+        
+        let options: [SCNPhysicsShape.Option : Any] = [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.convexHull]
+        let shape = SCNPhysicsShape(node: node, options: options)
+        let body = SCNPhysicsBody(type: .static, shape: nil)
+        body.isAffectedByGravity = false
+        body.contactTestBitMask = CollisionCategory.balls.rawValue
+        //body.collisionBitMask = CollisionCategory.balls.rawValue
+        
+        return body
+        
+    }
+    
     private func createStaticPhysicsBodyFor(_ node: SCNNode) -> SCNPhysicsBody {
         
         let options: [SCNPhysicsShape.Option : Any] = [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]
         let shape = SCNPhysicsShape(node: node, options: options)
+        let body = SCNPhysicsBody(type: .static, shape: shape)
+        body.isAffectedByGravity = false
         
-        return SCNPhysicsBody(type: .static, shape: shape)
+        return body
         
     }
     
     private func createPhysicsBodyForFloor(_ floor: SCNNode) -> SCNPhysicsBody {
-        return createStaticPhysicsBodyFor(floor)
+        let body = createStaticPhysicsBodyFor(floor)
+        body.categoryBitMask = CollisionCategory.floor.rawValue
+        body.collisionBitMask = CollisionCategory.balls.rawValue
+        return body
     }
     
     private func createPhysicsBodyForPost(_ post: SCNNode) -> SCNPhysicsBody {
-        return createStaticPhysicsBodyFor(post)
+        let body = createStaticPhysicsBodyFor(post)
+        body.categoryBitMask = CollisionCategory.post.rawValue
+        body.collisionBitMask = CollisionCategory.balls.rawValue
+        return body
     }
     
-    private func createPhysicsBodyForBall(_ ball: SCNNode, transform: simd_float4x4, powerFactor: PowerFactor) -> SCNPhysicsBody {
+    private func createPhysicsBodyForBall(_ ball: SCNNode, typeSyze: BallTypeSize) -> SCNPhysicsBody {
         
         let options: [SCNPhysicsShape.Option : Any] = [SCNPhysicsShape.Option.collisionMargin: 0.01]
-        let shape = SCNPhysicsShape(node: ball, options:options)
+        let shape = SCNPhysicsShape(node: ball, options: options)
+        let body = SCNPhysicsBody(type: .dynamic, shape: shape)
+        
+        //        let gravityField = SCNPhysicsField.radialGravity()
+        //        gravityField.strength = 75
+        //        ball.physicsField = gravityField
+        
+        body.mass = typeSyze.mass
+        body.contactTestBitMask = 1
+        
+        return body
+        
+    }
+    
+    private func createForceDirection(to ball: SCNNode, transform: simd_float4x4, powerFactor: PowerFactor) -> SCNVector3 {
+        
         let power = 3 * powerFactor.front
         let cameraTransform = SCNMatrix4(transform)
         let forceDirection = SCNVector3(-cameraTransform.m31 * power,
                                         -cameraTransform.m32 * powerFactor.up,
                                         -cameraTransform.m33 * power)
+        
+        return forceDirection
+        
+    }
+    
+    private func createPhysicsBodyForBall(_ ball: SCNNode, typeSyze: BallTypeSize, transform: simd_float4x4, powerFactor: PowerFactor) -> SCNPhysicsBody {
+        
+        let options: [SCNPhysicsShape.Option : Any] = [SCNPhysicsShape.Option.collisionMargin: 0.005]
+        let shape = SCNPhysicsShape(node: ball, options: options)
+        let power = 3 * powerFactor.front
+        let cameraTransform = SCNMatrix4(transform)
+        let forceDirection = SCNVector3(-cameraTransform.m31 * power,
+                                        -cameraTransform.m32 * powerFactor.up,
+                                        -cameraTransform.m33 * power)
+        let torqueDirection = SCNVector4Make(randFloat(-1,1), randFloat(-1,1), randFloat(-1,1), randFloat(-1,1))
         let body = SCNPhysicsBody(type: .dynamic, shape: shape)
         
-//        let gravityField = SCNPhysicsField.radialGravity()
-//        gravityField.strength = 75
-//        ball.physicsField = gravityField
-        
-        
+        body.applyTorque(torqueDirection, asImpulse: true)
         body.applyForce(forceDirection, asImpulse: true)
+        body.mass = typeSyze.mass
+        body.friction = 2
+        
+        body.categoryBitMask = CollisionCategory.balls.rawValue
+        body.contactTestBitMask = CollisionCategory.firstHoop.rawValue | CollisionCategory.secondHoop.rawValue
+        body.collisionBitMask = CollisionCategory.post.rawValue | CollisionCategory.floor.rawValue
+        
+        //body.categoryBitMask = 2
+        //body.contactTestBitMask = 1
         
         #if DEBUG
         print("BALL POWER - ", power)
@@ -235,6 +324,24 @@ struct ModelManager {
                 // Physics
                 post.physicsBody = createPhysicsBodyForPost(post)
                 
+                // add cylinders
+                NodeModel.cylinders.enumerated().forEach { index, cylinder in
+                    
+
+                    let helperCylinder = post.childNode(withName: cylinder.rawValue, recursively: true)
+                    var shape = helperCylinder?.copy() as! SCNNode
+                    self.scale(&shape, by: post.scale.x)
+                    
+                    helperCylinder?.physicsBody = createPhysicsBodyForCylinder(shape)
+
+                    if index == 0 {
+                        helperCylinder?.physicsBody?.categoryBitMask = CollisionCategory.firstHoop.rawValue
+                    } else {
+                        helperCylinder?.physicsBody?.categoryBitMask = CollisionCategory.secondHoop.rawValue
+                    }
+
+                }
+                
                 delegate?.postWillAdded()
                 
                 // add floor
@@ -247,7 +354,7 @@ struct ModelManager {
                         var floor = node
                         self.scale(&floor, by: size.rawValue)
                         floor.position = position
-                        floor.physicsBody = createPhysicsBodyForPost(floor)
+                        floor.physicsBody = createPhysicsBodyForFloor(floor)
                         
                         parent.addChildNode(floor)
                         
@@ -389,6 +496,83 @@ struct ModelManager {
         addPost(to: parent, size: size, position: position, yRotation: yRotation, floor: floor, completion: completion)
     }
     
+    private var preparedBall: SCNNode?
+    private var currentTypeSize: BallTypeSize?
+    
+    var ball: SCNNode? {
+        return preparedBall
+    }
+    
+    var typeSize: BallTypeSize? {
+        return currentTypeSize
+    }
+    
+    func removeBall(_ ball: SCNNode) {
+        
+        ball.removeFromParentNode()
+        
+    }
+    
+    /**
+     Подготавливает мяч для будущих добавлений
+     */
+    func prepareBall(typeSize: BallTypeSize, size: ModelSize = .real, completion: ((_ ball: SCNNode) -> ())? = nil) {
+        
+        fetch(.ball) { result in
+            
+            switch result {
+                
+            case .success(let node):
+                
+                var ball = node
+                
+                // Scaling
+                self.scale(&ball, by: typeSize.rawValue * size.rawValue)
+                
+                currentTypeSize = typeSize
+                
+                self.preparedBall = ball
+                
+//                // Physics
+//                ball.physicsBody = createPhysicsBodyForBall(ball, typeSyze: typeSize)
+                
+                completion?(ball)
+                
+            case .failure: break    // ERROR
+                
+            }
+            
+        }
+        
+    }
+    
+    /**
+     Создает мяч из настроек подготовленного мяча
+     */
+    func addAndThrowBall(to parent: SCNNode, transform: simd_float4x4, powerFactor: PowerFactor = (front: 1.0, up: 1.0), completion: ((_ post: SCNNode) -> ())? = nil) {
+        
+        guard let ball = preparedBall?.clone() else { return }
+        guard let typeSize = currentTypeSize else { return }
+        
+        // add position
+        let position = SCNVector3(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+        ball.position = position
+        
+        // Physics
+        ball.physicsBody = createPhysicsBodyForBall(ball, typeSyze: typeSize, transform: transform, powerFactor: powerFactor)
+//        let forceDirection = createForceDirection(to: ball, transform: transform, powerFactor: powerFactor)
+//        ball.physicsBody?.applyForce(forceDirection, asImpulse: true)
+        
+        delegate?.ballWillAdded(ball)
+        
+        parent.addChildNode(ball)
+        
+        delegate?.ballDidAdded(ball)
+        
+        completion?(ball)
+        
+    }
+    
     /**
      Add basket ball to a node
      
@@ -399,7 +583,7 @@ struct ModelManager {
          - transform: transform ball
          - completion: return "ball node". Default is "nil"
      */
-    func addBall(typeSize: BallTypeSize, to parent: SCNNode, size: ModelSize = .real, transform: simd_float4x4, powerFactor: PowerFactor = (front: 1.0, up: 1.0), completion: ((_ post: SCNNode) -> ())? = nil) {
+    func addBall(typeSize: BallTypeSize, to parent: SCNNode, size: ModelSize = .real, transform: simd_float4x4, powerFactor: PowerFactor = (front: 1.0, up: 1.0), completion: ((_ ball: SCNNode) -> ())? = nil) {
         
         fetch(.ball) { result in
             
@@ -417,7 +601,7 @@ struct ModelManager {
                 ball.position = position
                 
                 // Physics
-                ball.physicsBody = createPhysicsBodyForBall(ball, transform: transform, powerFactor: powerFactor)
+                ball.physicsBody = createPhysicsBodyForBall(ball, typeSyze: typeSize, transform: transform, powerFactor: powerFactor)
                 
                 delegate?.ballWillAdded(ball)
                 
