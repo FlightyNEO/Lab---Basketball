@@ -39,7 +39,7 @@ class GameViewController: UIViewController {
     private var scoredBalls = [SCNNode]() {
         didSet {
             DispatchQueue.main.async {
-                self.scoreLabel.text = String(self.scoredBalls.count) + "scores"
+                self.scoreLabel.text = String(self.scoredBalls.count) + " scores"
             }
         }
     }
