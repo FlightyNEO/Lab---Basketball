@@ -33,16 +33,8 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Set title button
-        //sizeModelButton.setTitle(currentModelSize.description, for: [])
-        
-        // Set segmented control
+        // Set segmented control "Choosing ball type size"
         typesSizeBallSegmentedControl.replaceSegments(withTitles: ballTypeSizes.map { $0.description })
-//        ballTypeSizes.enumerated().forEach { index, type in
-//            
-//            typesSizeBallSegmentedControl.setTitle(type.description, forSegmentAt: index)
-//            
-//        }
         
     }
     
@@ -58,11 +50,14 @@ class MainViewController: UIViewController {
     
     // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
         if segue.identifier == showARIdentifier {
             
             let augmentedRealityViewController = segue.destination as! GameViewController
+            
             augmentedRealityViewController.typeBall = selectedBallTypeSize!
             augmentedRealityViewController.sizeModel = selectedModelSize!
+            
         }
         
     }
@@ -81,8 +76,10 @@ class MainViewController: UIViewController {
         sizesModel.forEach { size in
             
             let action = UIAlertAction(title: size.description, style: .default) { [unowned self] _ in
+                
                 sender.setTitle(size.description, for: [])
                 self.selectedModelSize = size
+                
             }
             
             alertController.addAction(action)
@@ -90,7 +87,6 @@ class MainViewController: UIViewController {
         }
         
         present(alertController, animated: true)
-        
         
     }
     

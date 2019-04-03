@@ -22,20 +22,14 @@ class GameViewController: UIViewController {
     
     private var postIsAdded = false
     
-    deinit {
-        #if DEBUG
-        print("DEINIT")
-        #endif
-    }
-    
     private var postPlacementAreaSize: CGSize? = nil
-    
-    private var isCollidedFirstHoop = false
     
     private let maxBallsOnScene = 10
     private var balls = [SCNNode]()
+    private var ballsCollidedWithTheFirstRing = Set<SCNNode>()
+    private var failsBalls = Set<SCNNode>()
+    private var throwsCount = 0
     
-    private var ballsCollidedWithTheFirstRing = [SCNNode]()
     private var scoredBalls = [SCNNode]() {
         didSet {
             DispatchQueue.main.async {
@@ -58,11 +52,10 @@ class GameViewController: UIViewController {
         
         #if DEBUG
         // Show statistics such as fps and timing information
-//        sceneView.showsStatistics = true
-//        sceneView.debugOptions = [.showFeaturePoints, .showWorldOrigin]
-        // Show statistics such as fps and timing information
-//        sceneView.showsStatistics = true
-//        sceneView.debugOptions = [.showPhysicsShapes]
+        // sceneView.showsStatistics = true
+        // sceneView.debugOptions = [.showFeaturePoints, .showWorldOrigin]
+        sceneView.showsStatistics = true
+        // sceneView.debugOptions = [.showPhysicsShapes]
         #endif
         
         // Create a new scene
@@ -74,14 +67,11 @@ class GameViewController: UIViewController {
         // Set the contact delegate for "scene"
         sceneView.scene.physicsWorld.contactDelegate = self
         
-        modelManager = ModelManager(delegate: self)
+        // Create model manager and prepare ball
+        modelManager = ModelManager(delegate: self, ballTypeSize: typeBall, modelSize: sizeModel)
         
         // Fetch size placement area for bascketball post
         modelManager.placementAreaSizeOfPost(by: sizeModel) { postPlacementAreaSize = $0 }
-        
-        // Prepare ball
-        modelManager.prepareBall(typeSize: typeBall, size: sizeModel)
-//        modelManager.addBall(typeSize: typeBall, to: sceneView.scene.rootNode, size: sizeModel, transform: transform, powerFactor: powerFactor)
         
     }
     
@@ -109,6 +99,12 @@ class GameViewController: UIViewController {
         super.viewDidDisappear(animated)
     }
     
+    deinit {
+        #if DEBUG
+        print("DEINIT")
+        #endif
+    }
+    
 }
 
 // MARK: - Private methods
@@ -121,12 +117,13 @@ extension GameViewController {
         print(placementAreaSize)
         print(candidate)
         
-        if (candidate.width >= placementAreaSize.width && candidate.height >= placementAreaSize.height) ||
-            candidate.width >= placementAreaSize.height && candidate.height >= placementAreaSize.width {
-            return true
-        } else {
-            return false
-        }
+        guard
+            (candidate.width >= placementAreaSize.width &&
+            candidate.height >= placementAreaSize.height) ||
+            (candidate.width >= placementAreaSize.height &&
+            candidate.height >= placementAreaSize.width) else { return false }
+        
+        return true
         
     }
     
@@ -171,7 +168,19 @@ extension GameViewController {
 // MARK: - ARSCNViewDelegate
 extension GameViewController: ARSCNViewDelegate {
     
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) { }
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        
+        guard let extent = (anchor as? ARPlaneAnchor)?.extent else { return }
+        
+        let size = CGSize(width: CGFloat(extent.x), height: CGFloat(extent.z))
+        
+        // plane size check
+        guard suitableSizeForPlacementArea(candidate: size) else { return }
+        
+        // add placement area to the scene view
+        modelManager.addPlacementArea(to: node, size: size)
+        
+    }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         
@@ -241,18 +250,21 @@ extension GameViewController {
             
             guard powerFactor.up > 0 else { return }
             
+            // Adding and throwing ball
             modelManager.addAndThrowBall(to: sceneView.scene.rootNode, transform: transform, powerFactor: powerFactor) {
-                $0.name = $0.name! + String(self.balls.count)
+                
+                self.throwsCount += 1
+                
+                $0.name = $0.name! + String(self.throwsCount)
                 self.balls.append($0)
             }
             
             if balls.count >= maxBallsOnScene {
                 
+                // Removing ball
                 modelManager.removeBall(balls.removeFirst())
                 
             }
-            
-//            modelManager.addBall(typeSize: typeBall, to: sceneView.scene.rootNode, size: sizeModel, transform: transform, powerFactor: powerFactor)
             
         default: break
             
@@ -294,24 +306,11 @@ extension GameViewController: ModelManagerDelegate {
 // MARK: SCNPhysicsContactDelegate
 extension GameViewController: SCNPhysicsContactDelegate {
     
-//    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-//
-////        print(#function)
-////        print("did begin contact", contact.nodeA.physicsBody!.categoryBitMask, contact.nodeB.physicsBody!.categoryBitMask)
-////
-////        if contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue ||
-////            contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue {
-////
-////            print("Woohoo")
-////
-////        }
-//
-//    }
-    
     func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
         
-        //print(#function)
+        #if DEBUG
         print("did end contact", contact.nodeA.physicsBody!.categoryBitMask, contact.nodeB.physicsBody!.categoryBitMask)
+        #endif
         
         if (contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
             contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.firstHoop.rawValue) ||
@@ -320,13 +319,13 @@ extension GameViewController: SCNPhysicsContactDelegate {
             
             let ball = contact.nodeA.name!.contains(ModelManager.NodeModel.ball.rawValue) ? contact.nodeA : contact.nodeB
             
-            ballsCollidedWithTheFirstRing.append(ball)
+            guard !failsBalls.contains(ball) else { return }
             
-            if ballsCollidedWithTheFirstRing.count >= maxBallsOnScene {
-                ballsCollidedWithTheFirstRing.removeFirst()
-            }
+            ballsCollidedWithTheFirstRing.insert(ball)
             
-            print("Woohoo")
+            #if DEBUG
+            print(ball, " collision with first helper cylinder")
+            #endif
             
         }
         
@@ -335,19 +334,22 @@ extension GameViewController: SCNPhysicsContactDelegate {
             (contact.nodeB.physicsBody?.categoryBitMask == CollisionCategory.balls.rawValue &&
                 contact.nodeA.physicsBody?.categoryBitMask == CollisionCategory.secondHoop.rawValue)) {
             
-            guard !ballsCollidedWithTheFirstRing.isEmpty else { return }
-            
             let ball = contact.nodeA.name!.contains(ModelManager.NodeModel.ball.rawValue) ? contact.nodeA : contact.nodeB
             
+            failsBalls.insert(ball)
+            
+            guard !ballsCollidedWithTheFirstRing.isEmpty else { return }
+            
+
             if ballsCollidedWithTheFirstRing.contains(where: { $0.name == ball.name }) &&
                 !scoredBalls.contains(ball) {
-                
+
                 scoredBalls.append(ball)
                 
-                //scoreLabel.text = String(scoredBalls.count) + "scores"
-                
-                print("ГОООООООООООЛ!!!!!!!!!")
-                
+                #if DEBUG
+                print(ball, " flew into the basket")
+                #endif
+            
             }
             
         }
