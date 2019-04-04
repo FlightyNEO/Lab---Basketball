@@ -49,6 +49,7 @@ extension ModelManagerDelegate {
 class ModelManager {
     
     // MARK: Private properties
+    private var basketballPost: SCNNode?
     private var preparedBall: SCNNode?
     private var currentTypeSize: BallTypeSize?
     
@@ -353,7 +354,7 @@ extension ModelManager {
             case .success(var post):
                 
                 // Scaling
-                self.scale(&post, by: size.rawValue)
+                scale(&post, by: size.rawValue)
                 
                 // Position and orientation
                 post.position = position
@@ -376,6 +377,8 @@ extension ModelManager {
                 
                 delegate?.postDidAdded()
                 
+                basketballPost = post
+                
                 completion?(post)
                 
             case .failure: break    // ERROR
@@ -390,6 +393,27 @@ extension ModelManager {
 
 // MARK: - Public methods
 extension ModelManager {
+    
+    func distanceBetweenPost(and position: SCNVector3) -> Float? {
+        
+        guard let post = basketballPost else { return nil }
+        
+        let positionOne = SCNVector3ToGLKVector3(post.presentation.worldPosition)
+        let positionTwo = SCNVector3ToGLKVector3(position)
+        
+        return GLKVector3Distance(positionOne, positionTwo)
+    }
+    
+//    func distanceFromPost(to node: SCNNode) -> Float? {
+//        
+//        guard let post = basketballPost else { return nil }
+//        
+//        let node1Position = SCNVector3ToGLKVector3(post.presentation.worldPosition)
+//        let node2Position = SCNVector3ToGLKVector3(node.presentation.worldPosition)
+//        
+//        return GLKVector3Distance(node1Position, node2Position)
+//        
+//    }
     
     func getCameraTransform(for sceneView: ARSCNView) -> MDLTransform? {
         guard let transform = sceneView.session.currentFrame?.camera.transform else { return nil }

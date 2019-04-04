@@ -30,12 +30,34 @@ class GameViewController: UIViewController {
     private var failsBalls = Set<SCNNode>()
     private var throwsCount = 0
     
-    private var scoredBalls = [SCNNode]() {
+    private var scores: Int = 0 {
         didSet {
             DispatchQueue.main.async {
-                self.scoreLabel.text = String(self.scoredBalls.count) + " scores"
+                self.scoreLabel.text = String(self.scores) + " scores"
             }
         }
+    }
+    
+    private var ballsAndScores = [(SCNNode, Int)]() {
+        didSet {
+            scores += self.ballsAndScores.last!.1
+        }
+    }
+    
+//    private var scoredBalls = [SCNNode]() {
+//        didSet {
+//            DispatchQueue.main.async {
+//                self.scoreLabel.text = String(self.scoredBalls.count) + " scores"
+//            }
+//        }
+//    }
+    
+    /// Distance from basketball post to three-point line
+    private let threePointDistance: Float = 7.24 // meters
+    
+    /// Distance from basketball post to three-point line using scale
+    private var threePointDistanceOfScale: Float {
+        return threePointDistance * sizeModel.rawValue
     }
     
     // MARK: - Properties
@@ -124,6 +146,21 @@ extension GameViewController {
             candidate.height >= placementAreaSize.width) else { return false }
         
         return true
+        
+    }
+    
+    private func calculateScore() -> Int? {
+        
+        guard let transform = sceneView.session.currentFrame?.camera.transform else { return  nil}
+        let cameraPosition = SCNVector3(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+        guard let distance = self.modelManager.distanceBetweenPost(and: cameraPosition) else { return nil }
+        
+        #if DEBUG
+        print("Distance from post to boll - ", distance)
+        print("Three-point distance line - ", threePointDistanceOfScale)
+        #endif
+        
+        return distance >= threePointDistanceOfScale ? 3 : 1
         
     }
     
@@ -303,7 +340,7 @@ extension GameViewController: ModelManagerDelegate {
     
 }
 
-// MARK: SCNPhysicsContactDelegate
+// MARK: - SCNPhysicsContactDelegate
 extension GameViewController: SCNPhysicsContactDelegate {
     
     func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
@@ -324,7 +361,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
             ballsCollidedWithTheFirstRing.insert(ball)
             
             #if DEBUG
-            print(ball, " collision with first helper cylinder")
+            //print("Ball collision with first helper cylinder")
             #endif
             
         }
@@ -340,16 +377,18 @@ extension GameViewController: SCNPhysicsContactDelegate {
             
             guard !ballsCollidedWithTheFirstRing.isEmpty else { return }
             
-
+            
             if ballsCollidedWithTheFirstRing.contains(where: { $0.name == ball.name }) &&
-                !scoredBalls.contains(ball) {
-
-                scoredBalls.append(ball)
+                !ballsAndScores.contains(where: { $0.0 == ball } ) { //.contains(ball) {
+                
+                // Check distance to post
+                guard let score = calculateScore() else { return }
+                ballsAndScores.append((ball, score))
                 
                 #if DEBUG
-                print(ball, " flew into the basket")
+                print("Ball flew into the basket")
                 #endif
-            
+                
             }
             
         }
